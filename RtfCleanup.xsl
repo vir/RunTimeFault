@@ -11,8 +11,11 @@
 		<xsl:attribute name="top"><xsl:value-of select="shptop/@arg" /></xsl:attribute>
 		<xsl:attribute name="right"><xsl:value-of select="shpright/@arg" /></xsl:attribute>
 		<xsl:attribute name="bottom"><xsl:value-of select="shpbottom/@arg" /></xsl:attribute>
-		<xsl:value-of select="normalize-space(shptxt/f/text())" />
+		<xsl:apply-templates select="shptxt/f/text()" />
 	</text>
+</xsl:template>
+<xsl:template match="text()">
+	<xsl:value-of select="normalize-space(.)" />
 </xsl:template>
 <xsl:template match="*">
 </xsl:template>
