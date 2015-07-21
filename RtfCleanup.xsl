@@ -4,18 +4,26 @@
 <xsl:template match="/">
 	<rtf>
 		<!-- <xsl:apply-templates select="//shpinst"/> -->
-		<xsl:apply-templates select="//shpinst">
+		<xsl:apply-templates select="//fonttbl/f|//shpinst">
 			<xsl:sort select="shptop/@arg" data-type="number" />
 			<xsl:sort select="shpleft/@arg" data-type="number" />
 		</xsl:apply-templates>
 	</rtf>
 </xsl:template>
-<xsl:template match="//shpinst[shptxt]">
+<xsl:template match="fonttbl/f">
+	<font>
+		<xsl:attribute name="id"><xsl:value-of select="@arg" /></xsl:attribute>
+		<xsl:value-of select="text()" />
+	</font>
+</xsl:template>
+<xsl:template match="//shpinst[string-length(shptxt/f/text()|shptxt/f/line) > 0]">
 	<text>
 		<xsl:attribute name="top"><xsl:value-of select="shptop/@arg" /></xsl:attribute>
 		<xsl:attribute name="left"><xsl:value-of select="shpleft/@arg" /></xsl:attribute>
 		<!-- <xsl:attribute name="right"><xsl:value-of select="shpright/@arg" /></xsl:attribute>
 		<xsl:attribute name="bottom"><xsl:value-of select="shpbottom/@arg" /></xsl:attribute>-->
+		<xsl:attribute name="f"><xsl:value-of select="shptxt/f/@arg" /></xsl:attribute>
+		<xsl:attribute name="fs"><xsl:value-of select="shptxt/f/fs/@arg" /></xsl:attribute>
 		<xsl:apply-templates select="shptxt/f/text()|shptxt/f/line" />
 	</text>
 </xsl:template>
