@@ -9,11 +9,6 @@
 #include <vector>
 #include "cp1251.i"
 
-void dump_stream_flags(std::istream& s)
-{
-	std::cout << "Pos: " << s.tellg() << " Good: " << s.good() << " Fail: " << s.fail() << " Eof: " << s.eof() << std::endl;
-}
-
 class RTFParser
 {
 public:
@@ -52,6 +47,10 @@ public:
 			default: sink.Char(decode_char(c)); break;
 			}
 		}
+	}
+	void quiet(bool yes = true)
+	{
+		m_quiet = yes;
 	}
 protected:
 	void parse_escape(ISink& sink)
@@ -108,6 +107,8 @@ protected:
 	}
 	void error(const char * msg, char c = 0)
 	{
+		if (m_quiet)
+			return;
 		std::cerr << msg;
 		if (c)
 			std::cerr << " " << c;
@@ -121,6 +122,7 @@ private:
 	std::istream& m_stream;
 	unsigned int m_uc;
 	const long * m_encoding_table;
+	bool m_quiet;
 };
 
 class XmlDumperSink : public RTFParser::ISink
@@ -137,10 +139,6 @@ public:
 	}
 	virtual void Char(int c)
 	{
-		if ((c & 0xFF) == 0xFF)
-		{
-			std::cerr << "ops" << std::endl;
-		}
 		if (m_grp_pending)
 			open_group();
 		switch (c)
@@ -212,17 +210,36 @@ private:
 
 int main(int argc, char* argv[])
 {
-	if (argc != 2 && argc != 3)
+	const char * myname = argv[0];
+	++argv; --argc;
+
+	bool quiet = false;
+	if (argc > 1 && 0 == strcmp(argv[0], "-q"))
 	{
-		std::cerr << "Usage: " << argv[0] << " filename.rtf [filename.xml]" << std::endl;
+		quiet = true;
+		++argv; --argc;
+	}
+
+	if ((argc != 1 && argc != 2) || 0 == strcmp(argv[0], "-h"))
+	{
+		std::cerr << "Usage: " << myname << " [-q] filename.rtf [filename.xml]" << std::endl;
 		return 10;
 	}
-	std::ifstream f(argv[1]);
+
+	std::ifstream f(argv[0]);
+	if (f.fail())
+	{
+		std::cerr << "Can't open '" << argv[0] << "'" << std::endl;
+		return 5;
+	}
+
 	RTFParser p(f);
 	p.set_enc(encoding_1251);
-	if (argc == 3)
+	if (quiet)
+		p.quiet();
+	if (argc == 2)
 	{
-		std::ofstream o(argv[2]);
+		std::ofstream o(argv[1]);
 		XmlDumperSink w(o);
 		p.parse(w);
 		o.close();
