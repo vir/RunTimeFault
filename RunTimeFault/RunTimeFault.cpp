@@ -215,6 +215,7 @@ int main(int argc, char* argv[])
 	if (argc != 2 && argc != 3)
 	{
 		std::cerr << "Usage: " << argv[0] << " filename.rtf [filename.xml]" << std::endl;
+		return 10;
 	}
 	std::ifstream f(argv[1]);
 	RTFParser p(f);
