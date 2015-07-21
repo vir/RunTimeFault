@@ -212,17 +212,25 @@ private:
 
 int main(int argc, char* argv[])
 {
-	if (argc != 3)
+	if (argc != 2 && argc != 3)
 	{
-		std::cerr << "Usage: " << argv[0] << " filename.rtf filename.xml" << std::endl;
+		std::cerr << "Usage: " << argv[0] << " filename.rtf [filename.xml]" << std::endl;
 	}
 	std::ifstream f(argv[1]);
 	RTFParser p(f);
 	p.set_enc(encoding_1251);
-	std::ofstream o(argv[2]);
-	XmlDumperSink w(o);
-	p.parse(w);
-	o.close();
+	if (argc == 3)
+	{
+		std::ofstream o(argv[2]);
+		XmlDumperSink w(o);
+		p.parse(w);
+		o.close();
+	}
+	else
+	{
+		XmlDumperSink w(std::cout);
+		p.parse(w);
+	}
 	return 0;
 }
 
